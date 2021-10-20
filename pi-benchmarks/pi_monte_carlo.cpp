@@ -116,7 +116,7 @@ void calc_hits_by_ref_intensive_incr_with_atomic(counter_t n, atomic<counter_t>&
         double y = rnd();
         if (x * x + y * y < 1)
         {
-            hits.fetch_add(1, std::memory_order_relaxed);
+            hits++;
         }
     }
 }
@@ -124,6 +124,16 @@ void calc_hits_by_ref_intensive_incr_with_atomic(counter_t n, atomic<counter_t>&
 double calc_pi_single_thread(counter_t throws)
 {
     return static_cast<double>(calc_hits(throws)) / throws * 4;
+}
+
+double calc_pi_single_thread_with_mutex(counter_t throws)
+{
+    counter_t hits = 0;
+    mutex mtx;
+
+    calc_hits_by_ref_intensive_incr_with_mutex(throws, hits, mtx);
+
+    return static_cast<double>(hits) / throws * 4;
 }
 
 double calc_pi_multithread1(counter_t throws)
@@ -262,6 +272,10 @@ TEST_CASE("Monte Carlo Pi")
 
     BENCHMARK("synchronized using mutex") {
         return calc_pi_multithread_with_mutex(N);
+    };
+
+    BENCHMARK("single thread with mutex") {
+        return calc_pi_single_thread_with_mutex(N);
     };
 
     BENCHMARK("with atomics") {
