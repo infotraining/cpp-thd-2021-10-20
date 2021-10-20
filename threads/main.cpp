@@ -139,4 +139,24 @@ int main()
     std::cout << "Main thread ends..." << std::endl;
 
     lambda_explain();
+
+    const std::vector<int> source = {1, 2, 3, 4, 5, 6};
+
+    std::vector<int> target(source.size());
+    std::vector<int> backup(source.size());
+
+    {
+        ext::joining_thread thd_copy{[&] { std::copy(begin(source), end(source), begin(target)); }};
+        ext::joining_thread thd_backup{[&] { std::copy(begin(source), end(source), begin(backup)); }};
+    } // implicit join
+
+    std::cout << "target: ";
+    for (const auto& item : target)
+        std::cout << item << " ";
+    std::cout << "\n";
+
+    std::cout << "backup: ";
+    for (const auto& item : backup)
+        std::cout << item << " ";
+    std::cout << "\n";
 }
