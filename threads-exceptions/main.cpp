@@ -26,7 +26,7 @@ void background_work(size_t id, const std::string& text, std::chrono::millisecon
 {
     try
     {
-        std::cout << "bw#" << id << " has started..." << std::endl;
+        std::cout << "bw#" << id << " has started..." << " - std::thread::id: " << std::this_thread::get_id() << std::endl;
 
         for (const auto& c : text)
         {
@@ -50,6 +50,8 @@ void background_work(size_t id, const std::string& text, std::chrono::millisecon
 
 int main()
 {
+    std::cout << "Number of cores: " << std::max(1u, std::thread::hardware_concurrency()) << "\n";
+
     std::cout << "Main thread starts..." << std::endl;
     const std::string text = "Hello Threads";
 
