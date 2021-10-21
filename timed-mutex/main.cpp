@@ -5,54 +5,43 @@
 #include <string>
 #include <thread>
 #include <vector>
+#include <mutex>
 
 using namespace std::literals;
 
-void background_work(size_t id, const std::string& text, std::chrono::milliseconds delay)
+std::timed_mutex mtx;
+
+void background_work(size_t id, std::chrono::milliseconds timeout)
 {
-    std::cout << "bw#" << id << " has started..." << std::endl;
+    std::cout << "THD#" << id << " is waiting for mutex..." << std::endl;
 
-    for (const auto& c : text)
+    std::unique_lock<std::timed_mutex> lk{mtx, std::try_to_lock};
+
+    if (!lk.owns_lock())
     {
-        std::cout << "bw#" << id << ": " << c << std::endl;
-
-        std::this_thread::sleep_for(delay);
+        do
+        {
+            std::cout << "THD#" << id << " does not own a lock..."
+                      << " Tries to acquire a mutex..." << std::endl;
+        } while(!lk.try_lock_for(timeout));
     }
 
-    std::cout << "bw#" << id << " is finished..." << std::endl;
+    std::cout << "THD#" << id << " owns a mutex. Starts its job." << std::endl;
+    std::this_thread::sleep_for(10s);
+    std::cout << "THD#" << id << " is finished..." << std::endl;
 }
 
-class BackgroundWork
-{
-    const int id_;
-    const std::string text_;
-
-public:
-    BackgroundWork(int id, std::string text)
-        : id_{id}
-        , text_{std::move(text)}
-    {
-    }
-
-    void operator()(std::chrono::milliseconds delay) const
-    {
-        std::cout << "BW#" << id_ << " has started..." << std::endl;
-
-        for (const auto& c : text_)
-        {
-            std::cout << "BW#" << id_ << ": " << c << std::endl;
-
-            std::this_thread::sleep_for(delay);
-        }
-
-        std::cout << "BW#" << id_ << " is finished..." << std::endl;
-    }
-};
 
 int main()
 {
     std::cout << "Main thread starts..." << std::endl;
     const std::string text = "Hello Threads";
+
+    std::thread thd1{&background_work, 1, 750ms};
+    std::thread thd2{&background_work, 2, 500ms};
+
+    thd1.join();
+    thd2.join();
 
     std::cout << "Main thread ends..." << std::endl;
 }

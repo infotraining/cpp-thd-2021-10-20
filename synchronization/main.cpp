@@ -6,6 +6,7 @@
 #include <thread>
 #include <vector>
 #include <mutex>
+#include <atomic>
 
 using namespace std::literals;
 
@@ -27,7 +28,26 @@ public:
     }
 };
 
-void increment(Counter& counter)
+namespace atomics
+{
+    class Counter
+    {
+        std::atomic<int> counter{0};
+    public:
+        void increment()
+        {
+            //++counter;
+            counter.fetch_add(1);
+        }
+
+        int value() const
+        {
+            return counter.load();
+        }
+    };
+}
+
+void increment(atomics::Counter& counter)
 {
     for(int i = 0; i < 1'000'000; ++i)
     {
@@ -40,7 +60,7 @@ int main()
     std::cout << "Main thread starts..." << std::endl;
     const std::string text = "Hello Threads";
 
-    Counter counter;
+    atomics::Counter counter;
 
     std::thread thd1{&increment, std::ref(counter)};
     std::thread thd2{[&] { increment(counter); }};
