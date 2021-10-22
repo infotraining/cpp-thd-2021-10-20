@@ -98,11 +98,14 @@ void calc_hits_by_ref_intensive_incr_with_mutex(counter_t n, counter_t& hits, mu
         double x = rnd();
         double y = rnd();
         if (x * x + y * y < 1)
-        {
-            mtx.lock();
+        {            
             local_hits++;
-            mtx.unlock();
         }
+    }
+
+    {
+        std::lock_guard<std::mutex> lk{mtx};
+        hits += local_hits;
     }
 }
 
@@ -116,7 +119,7 @@ void calc_hits_by_ref_intensive_incr_with_atomic(counter_t n, atomic<counter_t>&
         double y = rnd();
         if (x * x + y * y < 1)
         {
-            hits++;
+            hits.fetch_add(1, std::memory_order_relaxed);
         }
     }
 }
