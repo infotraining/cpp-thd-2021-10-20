@@ -1,5 +1,19 @@
 # Szkolenie - Programowanie wielowątkowe w C++ #
 
+## Ankieta
+
+* https://forms.gle/JDB1KiCrxLh8NEqz8
+
+## Linki
+
+* http://ithare.com/infographics-operation-costs-in-cpu-clock-cycles/
+
+
+### Biblioteki
+
+* Abseil - https://abseil.io/
+* Folly - https://github.com/facebook/folly
+
 ## Dokumentacja + slajdy
 
 * https://infotraining.bitbucket.io/cpp-thd
